@@ -5,6 +5,7 @@ import exceptions.ItemTooHeavyException;
 import simulation.Building;
 import simulation.Clock;
 import simulation.IMailDelivery;
+import simulation.Simulation;
 
 /**
  * The robot delivers mail!
@@ -12,6 +13,8 @@ import simulation.IMailDelivery;
 public class Robot {
 	
     static public final int INDIVIDUAL_MAX_WEIGHT = 2000;
+    static public final int FAIL = 0;
+    static public final int SUCCESS = 1;
 
     IMailDelivery delivery;
     protected final String id;
@@ -32,6 +35,7 @@ public class Robot {
     private double totalServiceCost;
     private int totalLookupCount;
     private int totalFailures;
+    private double serviceFee;
     private double activityUnit; //New
     
 
@@ -51,6 +55,7 @@ public class Robot {
         this.mailPool = mailPool;
         this.receivedDispatch = false;
         this.deliveryCounter = 0;
+        this.serviceFee = 0;
         this.activityUnit = 0; //New
         this.totalDeliveryCounter = 0; //New
         this.totalActivityUnit = 0; //TODO
@@ -87,6 +92,7 @@ public class Robot {
                 } else {
                 	/** If the robot is not at the mailroom floor yet, then move towards it! */
                     moveTowards(Building.MAILROOM_LOCATION);
+                    
                 	break;
                 }
     		case WAITING:
@@ -100,6 +106,11 @@ public class Robot {
                 break;
     		case DELIVERING:
     			if(current_floor == destination_floor){ // If already here drop off either way
+    				// serviceFee should be set by remoteLookup()
+    				while (remoteLookup() == FAIL) {
+    					totalFailures++;
+    					activityUnit = activityUnit + 0.1;
+    				}
                     /** Delivery complete, report this to the simulator! */
                     delivery.deliver(deliveryItem, activityUnit);
                     activityUnit = 0; //New
@@ -121,10 +132,10 @@ public class Robot {
                         changeState(RobotState.DELIVERING);
                     }
     			} else {
-    				activityUnit += 5; //New
     				totalActivityUnit += 5; //New
 	        		/** The robot is not at the destination yet, move towards it! */
 	                moveTowards(destination_floor);
+	                activityUnit = activityUnit + 5;
     			}
                 break;
     	}
@@ -195,6 +206,15 @@ public class Robot {
 
 	
 	//New
+	
+	// performs a remote lookup to the BMS using the wifi modem. the robot should call until it gets
+	// a successful lookup and increment total failures accordingly
+	public int remoteLookup() {
+		serviceFee = Simulation.performRemoteLookup(current_floor);
+		return SUCCESS;
+		
+	}
+	
 	public int getTotalDeliveryCounter() {
 		return this.totalDeliveryCounter;
 	}

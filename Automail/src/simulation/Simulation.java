@@ -152,7 +152,7 @@ public class Simulation {
     	public void deliver(MailItem deliveryItem, double activityUnit){
     		if(!MAIL_DELIVERED.contains(deliveryItem)){
     			MAIL_DELIVERED.add(deliveryItem);
-                System.out.printf("T: %3d > Delivered(%4d) [%s | %f]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString(), activityUnit);
+                System.out.printf("T: %3d > Delivered(%4d) [%s | Activity Units: %f]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString(), activityUnit);
     			// Calculate delivery score
     			total_delay += calculateDeliveryDelay(deliveryItem);
     		}
@@ -179,5 +179,11 @@ public class Simulation {
         System.out.println("T: "+Clock.Time()+" | Simulation complete!");
         System.out.println("Final Delivery time: "+Clock.Time());
         System.out.printf("Delay: %.2f%n", total_delay);
+    }
+    
+    public static double performRemoteLookup(int floor) {
+    	assert (wModem!=null);
+    	return wModem.forwardCallToAPI_LookupPrice(floor);
+    	
     }
 }
