@@ -107,6 +107,7 @@ public class Robot {
     		case DELIVERING:
     			if(current_floor == destination_floor){ // If already here drop off either way
     				// serviceFee should be set by remoteLookup()
+    				activityUnit = activityUnit + 0.1;
     				while (remoteLookup() == FAIL) {
     					totalFailures++;
     					activityUnit = activityUnit + 0.1;
