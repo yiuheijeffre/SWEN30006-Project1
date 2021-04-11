@@ -18,7 +18,9 @@ public class MailItem {
     protected final int arrival_time;
     /** The weight in grams of the mail item */
     protected final int weight;
-
+    /* The expected charge of the mail item */
+    protected final double estimatedCharge; //New
+    
     /**
      * Constructor for a MailItem
      * @param dest_floor the destination floor intended for this mail item
@@ -30,6 +32,7 @@ public class MailItem {
         this.id = String.valueOf(hashCode());
         this.arrival_time = arrival_time;
         this.weight = weight;
+        this.estimatedCharge = ((dest_floor - 1) * 5 + 0.1) * 0.224 * 1.059; //New, Idk whats the service fee
     }
 
     @Override
@@ -67,6 +70,10 @@ public class MailItem {
     */
    public int getWeight(){
        return weight;
+   }
+   
+   public double getEstimatedCharge(){ //New
+	   return estimatedCharge;
    }
    
 	static private int count = 0;

@@ -73,7 +73,7 @@ public class Simulation {
          * This code section is for running a simulation
          */
         /* Instantiate MailPool and Automail */
-     	MailPool mailPool = new MailPool(NUM_ROBOTS);
+     	MailPool mailPool = new MailPool(NUM_ROBOTS, CHARGE_THRESHOLD); //new
         Automail automail = new Automail(mailPool, new ReportDelivery(), NUM_ROBOTS);
         MailGenerator mailGenerator = new MailGenerator(MAIL_TO_CREATE, MAIL_MAX_WEIGHT, mailPool, seedMap);
         
@@ -95,6 +95,8 @@ public class Simulation {
             Clock.Tick();
         }
         printResults();
+//        automail.mailPool.printMailItem();
+        System.out.println(automail.toString());
         System.out.println(wModem.Turnoff());
     }
     
@@ -147,10 +149,10 @@ public class Simulation {
     static class ReportDelivery implements IMailDelivery {
     	
     	/** Confirm the delivery and calculate the total score */
-    	public void deliver(MailItem deliveryItem){
+    	public void deliver(MailItem deliveryItem, double activityUnit){
     		if(!MAIL_DELIVERED.contains(deliveryItem)){
     			MAIL_DELIVERED.add(deliveryItem);
-                System.out.printf("T: %3d > Delivered(%4d) [%s]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString());
+                System.out.printf("T: %3d > Delivered(%4d) [%s | %f]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString(), activityUnit);
     			// Calculate delivery score
     			total_delay += calculateDeliveryDelay(deliveryItem);
     		}

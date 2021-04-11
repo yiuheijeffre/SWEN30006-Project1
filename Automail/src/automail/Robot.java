@@ -26,7 +26,13 @@ public class Robot {
     private MailItem deliveryItem = null;
     private MailItem tube = null;
     
-    private int deliveryCounter;
+    private int deliveryCounter; //New
+    private int totalDeliveryCounter;
+    private double totalActivityUnit;
+    private double totalServiceCost;
+    private int totalLookupCount;
+    private int totalFailures;
+    private double activityUnit; //New
     
 
     /**
@@ -45,6 +51,12 @@ public class Robot {
         this.mailPool = mailPool;
         this.receivedDispatch = false;
         this.deliveryCounter = 0;
+        this.activityUnit = 0; //New
+        this.totalDeliveryCounter = 0; //New
+        this.totalActivityUnit = 0; //TODO
+        this.totalServiceCost = 0; //TODO
+        this.totalLookupCount = 0; //TODO
+        this.totalFailures = 0; //TODO
     }
     
     /**
@@ -89,9 +101,11 @@ public class Robot {
     		case DELIVERING:
     			if(current_floor == destination_floor){ // If already here drop off either way
                     /** Delivery complete, report this to the simulator! */
-                    delivery.deliver(deliveryItem);
+                    delivery.deliver(deliveryItem, activityUnit);
+                    activityUnit = 0; //New
                     deliveryItem = null;
                     deliveryCounter++;
+                    totalDeliveryCounter++; //New
                     if(deliveryCounter > 2){  // Implies a simulation bug
                     	throw new ExcessiveDeliveryException();
                     }
@@ -107,6 +121,8 @@ public class Robot {
                         changeState(RobotState.DELIVERING);
                     }
     			} else {
+    				activityUnit += 5; //New
+    				totalActivityUnit += 5; //New
 	        		/** The robot is not at the destination yet, move towards it! */
 	                moveTowards(destination_floor);
     			}
@@ -160,6 +176,10 @@ public class Robot {
 	public boolean isEmpty() {
 		return (deliveryItem == null && tube == null);
 	}
+	
+	public boolean isEmptyTube() {
+		return tube == null;
+	}
 
 	public void addToHand(MailItem mailItem) throws ItemTooHeavyException {
 		assert(deliveryItem == null);
@@ -173,4 +193,25 @@ public class Robot {
 		if (tube.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
 	}
 
+	
+	//New
+	public int getTotalDeliveryCounter() {
+		return this.totalDeliveryCounter;
+	}
+	
+	public double getTotalActivityUnit() {
+		return this.totalActivityUnit;
+	}
+	
+	public double getTotalServiceCost() {
+		return this.totalServiceCost;
+	}
+	
+	public int getTotalLookupCount() {
+		return this.totalLookupCount;
+	}
+	
+	public int getTotalFailures() {
+		return this.totalFailures;
+	}
 }

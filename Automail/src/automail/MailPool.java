@@ -39,12 +39,20 @@ public class MailPool {
 	}
 	
 	private LinkedList<Item> pool;
+	private LinkedList<Item> priorityPool;
+	private LinkedList<Item> testPool;
+	private LinkedList<Item> testPriorityPool;
 	private LinkedList<Robot> robots;
+	private double chargeThreshold;
 
-	public MailPool(int nrobots){
+	public MailPool(int nrobots, double chargeThreshold){
 		// Start empty
 		pool = new LinkedList<Item>();
+		priorityPool = new LinkedList<Item>();
+		testPool = new LinkedList<Item>();
+		testPriorityPool = new LinkedList<Item>();
 		robots = new LinkedList<Robot>();
+		this.chargeThreshold = chargeThreshold;
 	}
 
 	/**
@@ -52,9 +60,22 @@ public class MailPool {
      * @param mailItem the mail item being added.
      */
 	public void addToPool(MailItem mailItem) {
+		
 		Item item = new Item(mailItem);
-		pool.add(item);
-		pool.sort(new ItemComparator());
+		if(mailItem.getEstimatedCharge() > chargeThreshold) { //New
+			priorityPool.add(item);
+			priorityPool.sort(new ItemComparator());
+			testPriorityPool.add(item);
+			testPriorityPool.sort(new ItemComparator());
+		}
+		else {
+			pool.add(item);
+			pool.sort(new ItemComparator());
+			testPool.add(item);
+			testPool.sort(new ItemComparator());
+		}
+//		pool.add(item);
+//		pool.sort(new ItemComparator());
 	}
 	
 	
@@ -74,19 +95,39 @@ public class MailPool {
 		assert(robot.isEmpty());
 		// System.out.printf("P: %3d%n", pool.size());
 		ListIterator<Item> j = pool.listIterator();
-		if (pool.size() > 0) {
+		ListIterator<Item> p = priorityPool.listIterator(); //New
+		if(priorityPool.size() > 0) {
 			try {
-			robot.addToHand(j.next().mailItem); // hand first as we want higher priority delivered first
-			j.remove();
-			if (pool.size() > 0) {
+			robot.addToHand(p.next().mailItem);
+			p.remove();
+			if(priorityPool.size() > 0) {
+				robot.addToTube(p.next().mailItem);
+				p.remove();
+			}
+			} catch (Exception e) {
+				throw e;
+			}
+		}
+		if (robot.isEmptyTube() && pool.size() > 0) { //Empty tube mean it can still hold an item from normal mail pool
+			if(robot.isEmpty()) { //Both hand and tube are empty
+				try {
+					robot.addToHand(j.next().mailItem); // hand first as we want higher priority delivered first
+					j.remove();
+					if (pool.size() > 0) {
+						robot.addToTube(j.next().mailItem);
+						j.remove();
+					}
+				} catch (Exception e) { 
+			            throw e; 
+			    } 
+			} else if(robot.isEmptyTube()) { //Only tube is empty
 				robot.addToTube(j.next().mailItem);
 				j.remove();
 			}
+		}
+		if(!robot.isEmpty()) {
 			robot.dispatch(); // send the robot off if it has any items to deliver
-			i.remove();       // remove from mailPool queue
-			} catch (Exception e) { 
-	            throw e; 
-	        } 
+			i.remove(); // remove from mailPool queue
 		}
 	}
 
@@ -96,5 +137,17 @@ public class MailPool {
 	public void registerWaiting(Robot robot) { // assumes won't be there already
 		robots.add(robot);
 	}
+	
+	public void printMailItem() {
+		ListIterator<Item> j = pool.listIterator();
+		ListIterator<Item> p = priorityPool.listIterator();
+		for(Item item: testPriorityPool) {
+			System.out.print("priority: ");
+			System.out.println(item.mailItem.toString());
+		}
+		for(Item item: testPool) {
+			System.out.println(item.mailItem.toString());
+		}
 
+	}
 }
