@@ -17,9 +17,9 @@ public class Automail {
     	
     	this.mailPool = mailPool;
     	
-    	/** Initialize robots */
+    	/** Initialize robots with current default mail charge adapter*/
     	robots = new Robot[numRobots];
-    	for (int i = 0; i < numRobots; i++) robots[i] = new Robot(delivery, mailPool, i);
+    	for (int i = 0; i < numRobots; i++) robots[i] = new Robot(delivery, mailPool, i, new DefaultMailChargeAdapter());
     }
     
     public int getTotalItemsDelivered() {

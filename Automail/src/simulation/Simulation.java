@@ -149,10 +149,17 @@ public class Simulation {
     static class ReportDelivery implements IMailDelivery {
     	
     	/** Confirm the delivery and calculate the total score */
-    	public void deliver(MailItem deliveryItem, double activityUnit){
+    	public void deliver(MailItem deliveryItem, double activityUnit, double deliveryCharge, double deliveryCost, double serviceFee){
+    		// if charge display, display something different
     		if(!MAIL_DELIVERED.contains(deliveryItem)){
     			MAIL_DELIVERED.add(deliveryItem);
-                System.out.printf("T: %3d > Delivered(%4d) [%s | Activity Units: %f]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString(), activityUnit);
+    			// Show charge display
+    			
+    			// consider when threshold is 0 and display is true
+    			if (Simulation.CHARGE_DISPLAY) {
+    				
+    			}
+                System.out.printf("T: %3d > Delivered(%4d) [%s | Charge: %f | Cost: %f | Fee: %f | Activity Units: %f]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString(), deliveryCharge, deliveryCost, serviceFee, activityUnit);
     			// Calculate delivery score
     			total_delay += calculateDeliveryDelay(deliveryItem);
     		}

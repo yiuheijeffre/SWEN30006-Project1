@@ -11,6 +11,6 @@ public interface IMailDelivery {
      * Delivers an item at its floor
      * @param mailItem the mail item being delivered.
      */
-	void deliver(MailItem mailItem, double activityUnit); //New
+	void deliver(MailItem mailItem, double activityUnit, double deliveryCharge, double deliveryCost, double serviceFee); //New
     
 }

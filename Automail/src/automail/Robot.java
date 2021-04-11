@@ -36,7 +36,9 @@ public class Robot {
     private int totalLookupCount;
     private int totalFailures;
     private double serviceFee;
+    private double deliveryCost;
     private double activityUnit; //New
+    private Charge mailChargeAdapter;
     
 
     /**
@@ -46,7 +48,7 @@ public class Robot {
      * @param delivery governs the final delivery
      * @param mailPool is the source of mail items
      */
-    public Robot(IMailDelivery delivery, MailPool mailPool, int number){
+    public Robot(IMailDelivery delivery, MailPool mailPool, int number, Charge mailChargeAdapter){
     	this.id = "R" + number;
         // current_state = RobotState.WAITING;
     	current_state = RobotState.RETURNING;
@@ -56,12 +58,14 @@ public class Robot {
         this.receivedDispatch = false;
         this.deliveryCounter = 0;
         this.serviceFee = 0;
+        this.deliveryCost = 0;
         this.activityUnit = 0; //New
         this.totalDeliveryCounter = 0; //New
         this.totalActivityUnit = 0; //TODO
         this.totalServiceCost = 0; //TODO
         this.totalLookupCount = 0; //TODO
         this.totalFailures = 0; //TODO
+        this.mailChargeAdapter = mailChargeAdapter;
     }
     
     /**
@@ -108,13 +112,17 @@ public class Robot {
     			if(current_floor == destination_floor){ // If already here drop off either way
     				// serviceFee should be set by remoteLookup()
     				activityUnit = activityUnit + 0.1;
+    				this.totalActivityUnit += 0.1;
     				while (remoteLookup() == FAIL) {
     					totalFailures++;
     					activityUnit = activityUnit + 0.1;
+    					this.totalActivityUnit += 0.1;
     				}
                     /** Delivery complete, report this to the simulator! */
-                    delivery.deliver(deliveryItem, activityUnit);
+    				double deliveryCharge = charge(this.activityUnit);
+                    delivery.deliver(deliveryItem, activityUnit, deliveryCharge, this.deliveryCost, this.serviceFee);
                     activityUnit = 0; //New
+                    deliveryCost = 0;
                     deliveryItem = null;
                     deliveryCounter++;
                     totalDeliveryCounter++; //New
@@ -204,6 +212,14 @@ public class Robot {
 		tube = mailItem;
 		if (tube.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
 	}
+	
+	public double charge(double activityUnits) {
+		double serviceFee = this.serviceFee;// bit shit
+		double activityCost = this.mailChargeAdapter.calculateActivityCost(activityUnits);
+		this.deliveryCost = serviceFee + activityCost;
+		double markupPercentage = this.mailChargeAdapter.getMarkupPercentage();
+		return (activityCost + serviceFee) * (1 + markupPercentage);
+	}
 
 	
 	//New
@@ -211,8 +227,12 @@ public class Robot {
 	// performs a remote lookup to the BMS using the wifi modem. the robot should call until it gets
 	// a successful lookup and increment total failures accordingly
 	public int remoteLookup() {
-		serviceFee = Simulation.performRemoteLookup(current_floor);
-		return SUCCESS;
+		if ((this.serviceFee = Simulation.performRemoteLookup(current_floor)) < 0) {
+			return FAIL;
+		}
+		else {
+			return SUCCESS;
+		}
 		
 	}
 	
