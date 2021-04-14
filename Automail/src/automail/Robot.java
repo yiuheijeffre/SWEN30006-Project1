@@ -6,7 +6,7 @@ import simulation.Building;
 import simulation.Clock;
 import simulation.IMailDelivery;
 import simulation.Simulation;
-
+import statistics.RobotStatistics;
 /**
  * The robot delivers mail!
  */
@@ -29,15 +29,12 @@ public class Robot {
     private MailItem deliveryItem = null;
     private MailItem tube = null;
     
-    private int deliveryCounter; //New
-    private int totalDeliveryCounter;
-    private double totalActivityUnit;
-    private double totalServiceCost;
-    private int totalLookupCount;
-    private int totalFailures;
+    private RobotStatistics robotStats;
+    
+    private int deliveryCounter;
     private double serviceFee;
     private double deliveryCost;
-    private double activityUnit; //New
+    private double activityUnit;
     private Charge mailChargeAdapter;
     
 
@@ -59,13 +56,9 @@ public class Robot {
         this.deliveryCounter = 0;
         this.serviceFee = 0;
         this.deliveryCost = 0;
-        this.activityUnit = 0; //New
-        this.totalDeliveryCounter = 0; //New
-        this.totalActivityUnit = 0; //TODO
-        this.totalServiceCost = 0; //TODO
-        this.totalLookupCount = 0; //TODO
-        this.totalFailures = 0; //TODO
+        this.activityUnit = 0;
         this.mailChargeAdapter = mailChargeAdapter;
+        this.robotStats = new RobotStatistics();
     }
     
     /**
@@ -112,11 +105,12 @@ public class Robot {
     			if(current_floor == destination_floor){ // If already here drop off either way
     				// serviceFee should be set by remoteLookup()
     				activityUnit = activityUnit + 0.1;
-    				this.totalActivityUnit += 0.1;
+    				robotStats.incrementTotalActivityUnit(0.1);
+    				
     				while (remoteLookup() == FAIL) {
-    					totalFailures++;
+    					robotStats.incrementFailures();
     					activityUnit = activityUnit + 0.1;
-    					this.totalActivityUnit += 0.1;
+    					robotStats.incrementTotalActivityUnit(0.1);
     				}
                     /** Delivery complete, report this to the simulator! */
     				double deliveryCharge = charge(this.activityUnit);
@@ -125,7 +119,8 @@ public class Robot {
                     deliveryCost = 0;
                     deliveryItem = null;
                     deliveryCounter++;
-                    totalDeliveryCounter++; //New
+                    robotStats.incrementTotalDeliveries();
+                    
                     if(deliveryCounter > 2){  // Implies a simulation bug
                     	throw new ExcessiveDeliveryException();
                     }
@@ -141,7 +136,8 @@ public class Robot {
                         changeState(RobotState.DELIVERING);
                     }
     			} else {
-    				totalActivityUnit += 5; //New
+    				robotStats.incrementTotalActivityUnit(5.0);
+
 	        		/** The robot is not at the destination yet, move towards it! */
 	                moveTowards(destination_floor);
 	                activityUnit = activityUnit + 5;
@@ -220,8 +216,6 @@ public class Robot {
 		double markupPercentage = this.mailChargeAdapter.getMarkupPercentage();
 		return (activityCost + serviceFee) * (1 + markupPercentage);
 	}
-
-	
 	//New
 	
 	// performs a remote lookup to the BMS using the wifi modem. the robot should call until it gets
@@ -235,24 +229,14 @@ public class Robot {
 		}
 		
 	}
-	
-	public int getTotalDeliveryCounter() {
-		return this.totalDeliveryCounter;
+
+	public RobotStatistics getRobotStats() {
+		return robotStats;
 	}
-	
-	public double getTotalActivityUnit() {
-		return this.totalActivityUnit;
+
+	public Charge getMailChargeAdapter() {
+		return mailChargeAdapter;
 	}
+	 
 	
-	public double getTotalServiceCost() {
-		return this.totalServiceCost;
-	}
-	
-	public int getTotalLookupCount() {
-		return this.totalLookupCount;
-	}
-	
-	public int getTotalFailures() {
-		return this.totalFailures;
-	}
 }
