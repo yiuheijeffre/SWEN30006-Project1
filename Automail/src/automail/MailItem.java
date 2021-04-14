@@ -3,6 +3,8 @@ package automail;
 import java.util.Map;
 import java.util.TreeMap;
 
+import simulation.Simulation;
+
 // import java.util.UUID;
 
 /**
@@ -18,8 +20,9 @@ public class MailItem {
     protected final int arrival_time;
     /** The weight in grams of the mail item */
     protected final int weight;
-    /* The expected charge of the mail item */
-    protected final double estimatedCharge; //New
+
+    
+    private Charge mailChargeAdapter;
     
     /**
      * Constructor for a MailItem
@@ -27,12 +30,12 @@ public class MailItem {
      * @param arrival_time the time that the mail arrived
      * @param weight the weight of this mail item
      */
-    public MailItem(int dest_floor, int arrival_time, int weight){
+    public MailItem(int dest_floor, int arrival_time, int weight, Charge mailChargeAdapter){
         this.destination_floor = dest_floor;
         this.id = String.valueOf(hashCode());
         this.arrival_time = arrival_time;
         this.weight = weight;
-        this.estimatedCharge = ((dest_floor - 1) * 5 + 0.1) * 0.224 * 1.059; //New, Idk whats the service fee
+        this.mailChargeAdapter = mailChargeAdapter;
     }
 
     @Override
@@ -72,8 +75,17 @@ public class MailItem {
        return weight;
    }
    
+   
+   // The estimated charge of the mail item
    public double getEstimatedCharge(){ //New
-	   return estimatedCharge;
+	   // times 2 for the return trip
+	   // only one lookup fee assuming success
+	   double estimatedActivityUnits = ((this.destination_floor - 1) * 5) * 2 + 0.1;
+	   double serviceFee = Simulation.performRemoteLookup(destination_floor);
+	   	   
+	   double estimatedActivityCost = this.mailChargeAdapter.calculateActivityCost(estimatedActivityUnits);
+	   double markupPercentage = this.mailChargeAdapter.getMarkupPercentage();
+	   return (estimatedActivityCost + serviceFee) * (1 + markupPercentage);
    }
    
 	static private int count = 0;

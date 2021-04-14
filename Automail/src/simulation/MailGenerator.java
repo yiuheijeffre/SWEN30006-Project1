@@ -2,6 +2,7 @@ package simulation;
 
 import java.util.*;
 
+import automail.DefaultMailChargeAdapter;
 import automail.MailItem;
 import automail.MailPool;
 
@@ -56,7 +57,8 @@ public class MailGenerator {
         int arrivalTime = generateArrivalTime();
         int weight = generateWeight();
         
-        newMailItem = new MailItem(destinationFloor,arrivalTime,weight);
+        // Use default mail charge method for now
+        newMailItem = new MailItem(destinationFloor,arrivalTime,weight, new DefaultMailChargeAdapter());
         return newMailItem;
     }
 

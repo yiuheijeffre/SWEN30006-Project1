@@ -96,18 +96,26 @@ public class MailPool {
 		// System.out.printf("P: %3d%n", pool.size());
 		ListIterator<Item> j = pool.listIterator();
 		ListIterator<Item> p = priorityPool.listIterator(); //New
+		
+		// Priority Allocation
 		if(priorityPool.size() > 0) {
 			try {
-			robot.addToHand(p.next().mailItem);
-			p.remove();
-			if(priorityPool.size() > 0) {
-				robot.addToTube(p.next().mailItem);
+				robot.addToHand(p.next().mailItem);
 				p.remove();
-			}
+				if(priorityPool.size() > 0) {
+					robot.addToTube(p.next().mailItem);
+					p.remove();
+				}
 			} catch (Exception e) {
 				throw e;
 			}
+			
+		} else if (robot.isEmptyTube()) {
+			robot.addToTube(p.next().mailItem);
+			p.remove();
 		}
+		
+		// Non-Priority Allocation
 		if (robot.isEmptyTube() && pool.size() > 0) { //Empty tube mean it can still hold an item from normal mail pool
 			if(robot.isEmpty()) { //Both hand and tube are empty
 				try {
