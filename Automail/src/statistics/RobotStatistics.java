@@ -6,6 +6,7 @@ public class RobotStatistics {
     private double totalServiceCost;
     private int totalLookupCount;
     private int totalFailures;
+    private int totalSuccesses;
     private int totalDeliveries;
     
     public RobotStatistics() {
@@ -13,6 +14,7 @@ public class RobotStatistics {
         this.totalServiceCost = 0;
         this.totalLookupCount = 0;
         this.totalFailures = 0;
+        this.totalSuccesses = 0;
         this.totalDeliveries = 0;
     }
     
@@ -48,7 +50,7 @@ public class RobotStatistics {
 		this.totalFailures = totalFailures;
 	}
 	public int getTotalSuccesses() {
-		return totalLookupCount - totalFailures;
+		return totalSuccesses;
 	}
 
 	public void incrementTotalServiceCost(double amount) {
@@ -60,6 +62,10 @@ public class RobotStatistics {
 	
 	public void incrementFailures() {
 		totalFailures++;
+	}
+	
+	public void incrementSuccesses() {
+		totalSuccesses++;
 	}
 	
 	public void incrementLookupCount() {

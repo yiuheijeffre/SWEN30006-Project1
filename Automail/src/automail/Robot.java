@@ -112,10 +112,13 @@ public class Robot {
     					activityUnit = activityUnit + 0.1;
     					robotStats.incrementTotalActivityUnit(0.1);
     				}
+    				robotStats.incrementSuccesses();
+    				robotStats.incrementTotalServiceCost(serviceFee);
                     /** Delivery complete, report this to the simulator! */
     				double deliveryCharge = charge(this.activityUnit);
                     delivery.deliver(deliveryItem, activityUnit, deliveryCharge, this.deliveryCost, this.serviceFee);
-                    activityUnit = 0; //New
+                    // reset counters for next delivery
+                    activityUnit = 0;
                     deliveryCost = 0;
                     deliveryItem = null;
                     deliveryCounter++;
@@ -210,17 +213,17 @@ public class Robot {
 	}
 	
 	public double charge(double activityUnits) {
-		double serviceFee = this.serviceFee;// bit shit
+		double serviceFee = this.serviceFee;
 		double activityCost = this.mailChargeAdapter.calculateActivityCost(activityUnits);
 		this.deliveryCost = serviceFee + activityCost;
 		double markupPercentage = this.mailChargeAdapter.getMarkupPercentage();
 		return (activityCost + serviceFee) * (1 + markupPercentage);
 	}
-	//New
 	
 	// performs a remote lookup to the BMS using the wifi modem. the robot should call until it gets
 	// a successful lookup and increment total failures accordingly
 	public int remoteLookup() {
+		robotStats.incrementLookupCount();
 		if ((this.serviceFee = Simulation.performRemoteLookup(current_floor)) < 0) {
 			return FAIL;
 		}

@@ -109,10 +109,6 @@ public class MailPool {
 			} catch (Exception e) {
 				throw e;
 			}
-			
-		} else if (robot.isEmptyTube()) {
-			robot.addToTube(p.next().mailItem);
-			p.remove();
 		}
 		
 		// Non-Priority Allocation

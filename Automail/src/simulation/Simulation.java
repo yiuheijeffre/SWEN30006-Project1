@@ -3,6 +3,7 @@ package simulation;
 import exceptions.ExcessiveDeliveryException;
 import exceptions.ItemTooHeavyException;
 import exceptions.MailAlreadyDeliveredException;
+import statistics.StatisticsProvider;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -94,9 +95,10 @@ public class Simulation {
 			}
             Clock.Tick();
         }
-        printResults();
-//        automail.mailPool.printMailItem();
-        System.out.println(automail.toString());
+        // create all the post-simulation stats using StatisticsProvider
+        StatisticsProvider stats = new StatisticsProvider(automail.robots);
+        
+        printResults(stats);
         System.out.println(wModem.Turnoff());
     }
     
@@ -107,7 +109,7 @@ public class Simulation {
     	automailProperties.setProperty("Floors", "10");
     	automailProperties.setProperty("Mail_to_Create", "80");
     	automailProperties.setProperty("ChargeThreshold", "0");
-    	automailProperties.setProperty("ChargeDisplay", "false");
+    	automailProperties.setProperty("ChargeDisplay", "true");
     	
     	// Read properties
 		FileReader inStream = null;
@@ -157,9 +159,12 @@ public class Simulation {
     			
     			// consider when threshold is 0 and display is true
     			if (Simulation.CHARGE_DISPLAY) {
-    				
+    				System.out.printf("T: %3d > Delivered(%4d) [%s | Charge: %.2f | Cost: %.2f | Fee: %.2f | Activity Units: %.2f]%n", 
+    						Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString(), deliveryCharge, deliveryCost, serviceFee, activityUnit);
     			}
-                System.out.printf("T: %3d > Delivered(%4d) [%s | Charge: %f | Cost: %f | Fee: %f | Activity Units: %f]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString(), deliveryCharge, deliveryCost, serviceFee, activityUnit);
+    			else {
+    				System.out.printf("T: %3d > Delivered(%4d) [%s]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString());
+    			}
     			// Calculate delivery score
     			total_delay += calculateDeliveryDelay(deliveryItem);
     		}
@@ -182,10 +187,18 @@ public class Simulation {
         return Math.pow(Clock.Time() - deliveryItem.getArrivalTime(),penalty)*(1+Math.sqrt(priority_weight));
     }
 
-    public static void printResults(){
+    public static void printResults(StatisticsProvider stats){
         System.out.println("T: "+Clock.Time()+" | Simulation complete!");
         System.out.println("Final Delivery time: "+Clock.Time());
         System.out.printf("Delay: %.2f%n", total_delay);
+        if (CHARGE_DISPLAY) {
+        	System.out.println("Total Deliveries: "+stats.getTotalDeliveries());
+        	System.out.printf("Total Billable Activity: %.2f%n",stats.getTotalBillableActivity());
+        	System.out.printf("Total Activity Cost: %.2f%n",stats.getTotalActivityCost());
+        	System.out.printf("Total Service Cost: %.2f%n",stats.getTotalServiceCost());
+        	System.out.println("Total number of lookups: "+stats.getTotalLookupCount()+", with "+stats.getTotalSuccesses()+
+        			" successes and "+stats.getTotalFailures()+" failures");
+        }
     }
     
     public static double performRemoteLookup(int floor) {

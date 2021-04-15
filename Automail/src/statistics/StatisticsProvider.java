@@ -52,7 +52,10 @@ public class StatisticsProvider {
 	}
 	
 	public int getTotalSuccesses() {
-		int totalSuccesses = getTotalLookupCount() - getTotalFailures();
+		int totalSuccesses = 0;
+		for (Robot robot : robots) {
+			totalSuccesses += robot.getRobotStats().getTotalSuccesses();
+		}
 		return totalSuccesses;
 	}
 	
