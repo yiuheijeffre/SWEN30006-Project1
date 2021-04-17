@@ -18,9 +18,4 @@ public class Automail {
     	for (int i = 0; i < numRobots; i++) robots[i] = new Robot(delivery, mailPool, i, new DefaultMailChargeAdapter());
     	this.statsProvider = new StatisticsProvider(robots);
     }
-    
-    @Override
-    public String toString() {
-    	return String.format("Total number of items delivered: %d\nTotal billable activity: %f\n", statsProvider.getTotalDeliveries(), statsProvider.getTotalBillableActivity());
-    }
 }
