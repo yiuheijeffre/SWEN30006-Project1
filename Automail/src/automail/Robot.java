@@ -58,6 +58,7 @@ public class Robot {
         this.receivedDispatch = false;
         this.deliveryCounter = 0;
         this.serviceFee = 0;
+        this.last_service_fee = 0;
         this.deliveryCost = 0;
         this.activityUnit = 0;
         this.mailChargeAdapter = mailChargeAdapter;
@@ -231,9 +232,11 @@ public class Robot {
 		}
 		if (lookups > MAX_FAILED_LOOKUPS) {
 			// dont increment service fee
+			this.serviceFee = this.last_service_fee;
 		}
 		else {
 			// Successful Lookup
+			this.last_service_fee = this.serviceFee;
 			activityUnit += activityUnitsToAdd;
 			robotStats.incrementSuccesses();
 			robotStats.incrementTotalServiceCost(serviceFee);	
