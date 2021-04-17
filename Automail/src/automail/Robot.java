@@ -34,7 +34,7 @@ public class Robot {
     private int deliveryCounter;
     private double serviceFee;
     private double deliveryCost;
-//    private double activityUnit;
+    private double activityUnit;
     private Charge mailChargeAdapter;
     
 
@@ -56,7 +56,7 @@ public class Robot {
         this.deliveryCounter = 0;
         this.serviceFee = 0;
         this.deliveryCost = 0;
-//        this.activityUnit = 0;
+        this.activityUnit = 0;
         this.mailChargeAdapter = mailChargeAdapter;
         this.robotStats = new RobotStatistics();
     }
@@ -103,31 +103,19 @@ public class Robot {
                 break;
     		case DELIVERING:
     			if(current_floor == destination_floor){ // If already here drop off either way
-    				// serviceFee should be set by remoteLookup()
-    				double activityUnit = 0;
-    				activityUnit = activityUnit + 0.1;
-    				robotStats.incrementTotalActivityUnit(0.1);
-    				
-    				while (remoteLookup() == FAIL) {
-    					robotStats.incrementFailures();
-    					activityUnit = activityUnit + 0.1;
-    					robotStats.incrementTotalActivityUnit(0.1);
-    				}
-    				robotStats.incrementSuccesses();
-    				robotStats.incrementTotalServiceCost(serviceFee);
-    				
-    				// Add the movement activityUnits as if this was an independent delivery
-    				activityUnit += (5.0 * (this.current_floor - 1)) * 2;
+    				calculateServiceFee();
+    			    
+    				// Add the movement activityUnits as if this was an independent delivery including the return trip
+    				this.activityUnit += (5.0 * (this.current_floor - 1)) * 2;
     				robotStats.incrementTotalActivityUnit((5.0 * (this.current_floor - 1)) * 2);
     				
-    				double deliveryCharge = charge(activityUnit);
-//    				System.out.println("activityUnit: " + activityUnit);
+    				double deliveryCharge = charge(this.activityUnit);
     				
                     /** Delivery complete, report this to the simulator! */
     				
                     delivery.deliver(deliveryItem, activityUnit, deliveryCharge, this.deliveryCost, this.serviceFee);
                     // reset counters for next delivery
-//                    activityUnit = 0;
+                    activityUnit = 0;
                     deliveryCost = 0;
                     deliveryItem = null;
                     deliveryCounter++;
@@ -148,11 +136,9 @@ public class Robot {
                         changeState(RobotState.DELIVERING);
                     }
     			} else {
-//    				robotStats.incrementTotalActivityUnit(5.0);
 
 	        		/** The robot is not at the destination yet, move towards it! */
 	                moveTowards(destination_floor);
-//	                activityUnit = activityUnit + 5;
     			}
                 break;
     	}
@@ -223,10 +209,23 @@ public class Robot {
 	
 	public double charge(double activityUnits) {
 		double activityCost = this.mailChargeAdapter.calculateActivityCost(activityUnits);
-//		System.out.println("activityCost: " + activityCost);
 		this.deliveryCost = this.serviceFee + activityCost;
 		double markupPercentage = this.mailChargeAdapter.getMarkupPercentage();
 		return this.deliveryCost * (1 + markupPercentage);
+	}
+	
+	public void calculateServiceFee() {
+		activityUnit += 0.1;
+		robotStats.incrementTotalActivityUnit(0.1);
+		
+		while (remoteLookup() == FAIL) {
+			robotStats.incrementFailures();
+			activityUnit += 0.1;
+			robotStats.incrementTotalActivityUnit(0.1);
+		}
+		// Successful Lookup
+		robotStats.incrementSuccesses();
+		robotStats.incrementTotalServiceCost(serviceFee);
 	}
 	
 	// performs a remote lookup to the BMS using the wifi modem. the robot should call until it gets
