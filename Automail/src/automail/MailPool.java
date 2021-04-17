@@ -1,3 +1,4 @@
+// W05 Team 05 [Wed 05:15PM]
 package automail;
 
 import java.util.LinkedList;
@@ -142,16 +143,4 @@ public class MailPool {
 		robots.add(robot);
 	}
 	
-	public void printMailItem() {
-		ListIterator<Item> j = pool.listIterator();
-		ListIterator<Item> p = priorityPool.listIterator();
-		for(Item item: testPriorityPool) {
-			System.out.print("priority: ");
-			System.out.println(item.mailItem.toString());
-		}
-		for(Item item: testPool) {
-			System.out.println(item.mailItem.toString());
-		}
-
-	}
 }
