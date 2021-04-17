@@ -16,6 +16,7 @@ public class Robot {
     static public final int INDIVIDUAL_MAX_WEIGHT = 2000;
     static public final int FAIL = 0;
     static public final int SUCCESS = 1;
+    static public final int MAX_FAILED_LOOKUPS = 10;
 
     IMailDelivery delivery;
     protected final String id;
@@ -26,6 +27,7 @@ public class Robot {
     private int destination_floor;
     private MailPool mailPool;
     private boolean receivedDispatch;
+    private double last_service_fee;
     
     private MailItem deliveryItem = null;
     private MailItem tube = null;
@@ -216,17 +218,26 @@ public class Robot {
 	}
 	
 	public void calculateServiceFee() {
-		activityUnit += 0.1;
+		int lookups = 0;
+		double activityUnitsToAdd = 0;
+		activityUnitsToAdd += 0.1;
 		robotStats.incrementTotalActivityUnit(0.1);
 		
-		while (remoteLookup() == FAIL) {
+		while (remoteLookup() == FAIL && lookups <= MAX_FAILED_LOOKUPS) {
 			robotStats.incrementFailures();
-			activityUnit += 0.1;
+			activityUnitsToAdd += 0.1;
 			robotStats.incrementTotalActivityUnit(0.1);
+			lookups++;
 		}
-		// Successful Lookup
-		robotStats.incrementSuccesses();
-		robotStats.incrementTotalServiceCost(serviceFee);
+		if (lookups > MAX_FAILED_LOOKUPS) {
+			// dont increment service fee
+		}
+		else {
+			// Successful Lookup
+			activityUnit += activityUnitsToAdd;
+			robotStats.incrementSuccesses();
+			robotStats.incrementTotalServiceCost(serviceFee);	
+		}
 	}
 	
 	// performs a remote lookup to the BMS using the wifi modem. the robot should call until it gets
