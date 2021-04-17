@@ -160,7 +160,7 @@ public class Simulation {
     			// consider when threshold is 0 and display is true
     			if (Simulation.CHARGE_DISPLAY) {
     				System.out.printf("T: %3d > Delivered(%4d) [%s | Charge: %.2f | Cost: %.2f | Fee: %.2f | Activity Units: %.2f]%n", 
-    						Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString(), deliveryCharge, deliveryCost, serviceFee, activityUnit);
+    				Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString(), deliveryCharge, deliveryCost, serviceFee, activityUnit);
     			}
     			else {
     				System.out.printf("T: %3d > Delivered(%4d) [%s]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString());
