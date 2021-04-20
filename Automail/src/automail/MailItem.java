@@ -81,9 +81,11 @@ public class MailItem {
    public double getEstimatedCharge(){ //New
 	   // times 2 for the return trip
 	   // only one lookup fee assuming success
-	   double estimatedActivityUnits = ((this.destination_floor - 1) * 5) * 2 + 0.1;
-	   double serviceFee = Simulation.performRemoteLookup(destination_floor);
-	   	   
+	   // this doesn't count towards the lookups included in billable activity because it's for the estimated charge
+	   double estimatedActivityUnits = ((this.destination_floor - 1) * 5) * 2 + 0.1, serviceFee = 0;
+	   if (Simulation.getChargeDisplay()) {
+		   serviceFee = Simulation.performRemoteLookup(destination_floor);
+	   }
 	   double estimatedActivityCost = this.mailChargeAdapter.calculateActivityCost(estimatedActivityUnits);
 	   double markupPercentage = this.mailChargeAdapter.getMarkupPercentage();
 	   return (estimatedActivityCost + serviceFee) * (1 + markupPercentage);

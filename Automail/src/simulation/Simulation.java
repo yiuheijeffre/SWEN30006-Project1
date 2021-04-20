@@ -197,7 +197,7 @@ public class Simulation {
         	System.out.printf("Total Billable Activity: %.2f%n",stats.getTotalBillableActivity());
         	System.out.printf("Total Activity Cost: %.2f%n",stats.getTotalActivityCost());
         	System.out.printf("Total Service Cost: %.2f%n",stats.getTotalServiceCost());
-        	System.out.println("Total number of lookups: "+stats.getTotalLookupCount()+", with "+stats.getTotalSuccesses()+
+        	System.out.println("Total number of lookups by robots: "+stats.getTotalLookupCount()+", with "+stats.getTotalSuccesses()+
         			" successes and "+stats.getTotalFailures()+" failures");
         }
     }
@@ -206,5 +206,9 @@ public class Simulation {
     	assert (wModem!=null);
     	return wModem.forwardCallToAPI_LookupPrice(floor);
     	
+    }
+    
+    public static boolean getChargeDisplay() {
+    	return CHARGE_DISPLAY;
     }
 }

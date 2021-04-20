@@ -224,11 +224,13 @@ public class Robot {
 		activityUnitsToAdd += 0.1;
 		robotStats.incrementTotalActivityUnit(0.1);
 		
-		while (remoteLookup() == FAIL && lookups <= MAX_FAILED_LOOKUPS) {
-			robotStats.incrementFailures();
-			activityUnitsToAdd += 0.1;
-			robotStats.incrementTotalActivityUnit(0.1);
-			lookups++;
+		if (Simulation.getChargeDisplay()) {
+			while (remoteLookup() == FAIL && lookups <= MAX_FAILED_LOOKUPS) {
+				robotStats.incrementFailures();
+				activityUnitsToAdd += 0.1;
+				robotStats.incrementTotalActivityUnit(0.1);
+				lookups++;
+			}
 		}
 		if (lookups > MAX_FAILED_LOOKUPS) {
 			// dont increment service fee
